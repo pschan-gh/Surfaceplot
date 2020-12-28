@@ -9,7 +9,7 @@ var  basicPlotOptions, options, glOptions;
 //end settings
 
 function init_settings(rotationMatrix, dimensions) {
-
+    console.log(dimensions);
     var background = '#f8f8f8';
     var axisForeColour = '#444444';
     var hideFloorPolygons = false;
@@ -85,16 +85,61 @@ function getURL(surfaceplot, path) {
     return url;
 }
 
+function getJSON(surfaceplot, path) {
+    var params = ['zscale', 'domain', 'numsamples', 'autozscale', 'showaxes', 'centeredaxes', 'xmin', 'xmax', 'ymin', 'ymax', 'zmin', 'zmax', 'xticks', 'yticks', 'zticks'];
+    
+    var data = {};
+    
+    data.sidebar = 0;
+
+    params.forEach(param => {
+        data[param] = document.getElementById(param).value;
+    });
+
+    var eqsarray = eqStructs.eqStructArray;
+    data.equations = new Array();
+    // data.colors = new Array();
+    // data.alphas = new Array();
+    // data.sdomain = new Array();
+    // data.tdomain = new Array();
+
+    for (i = 0; i < eqsarray.length; i++) {
+        data.equations[i] = {};
+        data.equations[i].isParam = false;
+        data.equations[i].formula = eqsarray[i].str;
+        if(eqsarray[i].isParam) {
+            data.equations[i].isParam = true;
+            data.equations[i].domain =  {
+                s : eqsarray[i].domain.sMin + ',' + eqsarray[i].domain.sMax,
+                t : eqsarray[i].domain.tMin + ',' + eqsarray[i].domain.tMax
+            }
+            
+        }    
+        data.equations[i].color= rgbToHex(eqsarray[i].colourGradient[0].rgb);
+        data.equations[i].alpha= eqsarray[i].colourGradient[0].alpha;
+    }
+
+    var rotMat = surfaceplot.surfacePlot.rotationMatrix;
+    for (i = 0; i < rotMat.length; i++) {
+        rotMat[i] = Math.round(100*rotMat[i])/100;
+    }
+
+    data.rotationMatrix = rotMat;
+    console.log(data);
+    return path + '?data=' + encodeURIComponent(JSON.stringify(data));
+}
+
 function shareURL(surfaceplot, path) {
 
-    shareOverlay = document.getElementById('share-overlay');
-    
-    shareOverlay.display = 'block';
+    // shareOverlay = document.getElementById('share-overlay');
+    // 
+    // shareOverlay.display = 'block';
 
-    url = getURL(surfaceplot, path);
+    // url = getURL(surfaceplot, path);
+    url = getJSON(surfaceplot, path);
 
-    document.getElementById('share').value = url;
-    document.getElementById('embed').value = "<iframe style=\"width:100%;height:700px\" frameBorder=\"0\" src=\"" + url + "&dimensions=[600,600]\"></iframe><br><center><a href=\""+ url + "\" target=\"_blank\">WebGL Surface Grapher</a></center>";
+    $('.share').val(url);
+    $('.embed').val("<iframe style=\"width:100%;height:700px\" frameBorder=\"0\" src=\"" + url + "&dimensions=[600,600]\"></iframe><br><center><a href=\""+ url + "\" target=\"_blank\">WebGL Surface Grapher</a></center>");
 }
 
 var nullDatas = [{nRows: numSamples, nCols: numSamples, formattedValues: null, scaleFactor: 1, colourGradient: [{rgb:{red:0, green:0, blue:0}, alpha:0}]}];
@@ -550,7 +595,8 @@ function setUp(surfaceplot, valuess) {
 
     surfaceplot.draw(datas, glOptions, options);
 
-    var url = getURL(surfacePlot, path);
+    // var url = getURL(surfacePlot, path);
+    var url = getJSON(surfacePlot, path);
 
     $('#brand').html('<a style="color:#ddd" onmouseover="this.style.color=\'SteelBlue\'" onmouseout="this.style.color=\'#ddd\'" href="' + url +'" target="_blank">WebGL<br>Surface Grapher</a>');
 }
