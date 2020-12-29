@@ -8,14 +8,26 @@ body {
 
 #menu_button {
     position:absolute;
-    top:0.5em;
+    /* top:0.25em; */
     left:1em;
     font-size:1.5em;
+    float:left;
     z-index:200;
+    color : #ddd;
+}
+#menu_button:hover {
+  color: #444;
+}
+
+.camera_reset {
+  color: #ddd;
+}
+.camera_reset:hover {
+  color: #444;
 }
 
 #sidebar {
-/*    position:absolute; 
+/*    position:absolute;
     top:1.2em;
     left:0.5em;
 */
@@ -73,11 +85,11 @@ padding:2px 0px;
 overflow:hidden;
 }
 
-/*.properties:after { 
-   content: "."; 
-   visibility: hidden; 
-   display: block; 
-   height: 0; 
+/*.properties:after {
+   content: ".";
+   visibility: hidden;
+   display: block;
+   height: 0;
    clear: both;
 }*/
 
@@ -140,7 +152,7 @@ margin-right:2px;
     border: solid 0px #e0e0e0;
     color: black; /* Make the input most prominent. */
 }
- 
+
 #advanced{
 padding: 4px 4px 4px 4px;
 border: solid 1px #e0e0e0;
@@ -148,7 +160,7 @@ border: solid 1px #e0e0e0;
 
 #surfacePlotDiv {
 margin:auto auto;
-/*width: 400px; 
+/*width: 400px;
 height: 400px;*/
 z-index:50;
 }
@@ -225,8 +237,8 @@ and (max-device-width : 600px) {
 	overflow:hidden;
 	color:black;
     }
-    
-    
+
+
     .param_input {
 	/*position:relative;*/
 	display:block;
@@ -250,7 +262,7 @@ and (max-width : 1600px) {
     body {
 	color:black;
     }
-    
+
     html {
 	font-size:1.2em;
     }
@@ -307,8 +319,8 @@ and (max-width : 1600px) {
 	color:black;
 	overflow:hidden;
     }
-    
-    
+
+
     .param_input {
 	/*position:relative;*/
 	display:block;
@@ -318,7 +330,7 @@ and (max-width : 1600px) {
 	color:black;
 	overflow:hidden;
     }
-    
+
     .mathdiv {
 	font-size:1.5em;
     }
