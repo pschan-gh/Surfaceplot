@@ -5,11 +5,200 @@ var range;
 //settings
 var numSamples = 20;
 var  basicPlotOptions, options, glOptions;
-    
+
+var nullDatas = [{nRows: numSamples, nCols: numSamples, formattedValues: null, scaleFactor: 1, colourGradient: [{rgb:{red:0, green:0, blue:0}, alpha:0}]}];    
 //end settings
 
+class eqStruct {
+    constructor(surfaceplot, eqInfo, isParam) {
+        this.surfaceplot = surfaceplot;
+        this.eqInfo = eqInfo;
+        this.isParam = isParam;
+        
+        let input = document.createElement("div");
+        let container;
+        let num_equations = 0;
+        let num_params = 0;
+        
+        num_equations = document.getElementById("equations").childElementCount;
+        if (document.getElementById("param_equations")!= null) {
+            num_params = document.getElementById("param_equations").childElementCount;
+        }
+        
+        if(!isParam) {
+            container = document.getElementById("equations");
+            input.className = "input"; // set the CSS class
+            this.index = num_equations;
+            input.id = "input" + this.index;
+        } else {
+            container = document.getElementById("param_equations");
+            input.className = "param_input";
+            this.index = num_params;
+            input.id = "param_input" + this.index;
+        }
+        
+        container.appendChild(input); 
+
+        let eqdiv = document.createElement("div");
+        eqdiv.className = "eqdiv";
+
+        let show = document.createElement("input");
+        show.type = "checkbox";
+        show.className = 'show';
+        show.value = "1";
+        show.checked = "true";
+        show.style.cssFloat = "left";
+        show.style.width = "20px";
+        
+        let close = document.createElement("div");
+        close.style.cssFloat = "left";
+        // close.style.width = "20px";
+        close.innerHTML = "&times;";
+     
+        
+        let equationinput = document.createElement("input");        
+        equationinput.className = "equationinput"; // set the CSS class
+        if(!isParam) {
+            equationinput.id = "equationinput" + this.index;
+        } else {
+            equationinput.id = "paramequationinput" + this.index;
+        }
+        equationinput.type = "text";
+
+        equationinput.value = eqInfo == null ? "" : eqInfo.str;
+        
+        var color1 = document.createElement("input");
+        
+        color1.type = "color";
+        color1.className = "color1 color";
+        color1.style.cssFloat = "right";
+        color1.style.height = "1.75em";
+        color1.style.width = "2em";
+
+        let k = num_equations + num_params;
+        console.log(k);
+        if(eqInfo.color == "") {
+            var hue = (0.55 + k*0.37) % 1;
+            var saturation = (hue > 0.45) && (hue < 0.6) ? 0.5 : 0.3;
+            var color = HSVtoRGB(hue, saturation, 0.85);
+            color1.value = "#" + rgbToHex(color);
+        } else {
+            color1.value = "#" + eqInfo.color;
+        }
+        this.color = color1.value;
+        
+        var alpha = document.createElement("input");
+        alpha.type = "number";
+        alpha.min = "0.5";
+        alpha.max = "1";
+        alpha.step = "0.2";
+        alpha.style.width = "2.5em";
+        alpha.style.color = "#888";
+        alpha.style.cssFloat = "right";
+        alpha.className = 'alpha'
+
+        alpha.value = eqInfo.alpha == null ? "0.9":parseFloat(eqInfo.alpha);
+
+        input.appendChild(show);
+        input.appendChild(close);
+        input.appendChild(eqdiv);
+        input.appendChild(color1);
+        input.appendChild(alpha);
+        
+        
+        eqdiv.appendChild(equationinput);        
+        
+        if(isParam) {
+            color1.style.display="none";
+            alpha.style.display="none";
+        }
+
+        if(isParam) {
+            var properties = document.createElement("div");
+            properties.className = "properties";
+            
+            var domainButton = document.createElement("button");
+            domainButton.type="button";
+            domainButton.className ="btn btn-outline-info btn-sm";
+            domainButton.style.cssFloat = "right";
+            domainButton.style.display = "inline-block";
+            domainButton.style.marginRight = "0px";
+            domainButton.style.marginLeft = "0px";
+            
+            domainButton.innerHTML = "More";
+            domainButton.onclick = function() {eqdiv.style.paddingBottom = "4px";properties.style.display = "block";this.style.display = "none";color1.style.display="inline";alpha.style.display="inline";};
+            input.appendChild(domainButton);
+
+            
+            let sdomain = document.createElement("div");
+            let tdomain = document.createElement("div");
+            
+            sdomain.className = "domain";
+            sdomain.style.clear="left";
+            sdomain.style.cssFloat="left";
+            sdomain.style.marginLeft="20px";
+            tdomain.className = "domain"
+            tdomain.style.cssFloat="left"
+            tdomain.style.marginLeft="4px";
+            
+            sdomain.innerHTML = "<span>$s \\in$</span>";
+            tdomain.innerHTML="<span>$t \\in$</span>";
+            
+            var sdomaininput = document.createElement("input");
+            sdomaininput.type = "text";
+            sdomaininput.value = eqInfo.domain.s;
+            sdomaininput.style.width="3em";
+            sdomaininput.className = "sdomain";
+            
+            var tdomaininput = document.createElement("input");
+            tdomaininput.type = "text";
+            tdomaininput.value = eqInfo.domain.t;
+            tdomaininput.style.width="3em";
+            tdomain.className = "domain";
+            tdomaininput.className = "tdomain";
+            
+            sdomain.appendChild(sdomaininput);
+            tdomain.appendChild(tdomaininput);	
+            
+            var submit = document.createElement("button");
+            submit.type = "button";
+            submit.className ="btn btn-outline-info btn-sm";
+            submit.style.cssFloat = "right";
+            submit.innerHTML="Graph";
+            submit.onclick = function(){try{color1.style.display="inline-block";alpha.style.display="inline-block";eqStructs.update();eqStructs.evaluate();setUp(surfaceplot, global_valuess);properties.style.display = "none";}catch(a){}};
+            
+            
+            properties.appendChild(sdomain);
+            properties.appendChild(tdomain);
+            properties.appendChild(submit);
+            
+            input.appendChild(properties);
+            
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub, sdomain]);
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub, tdomain]);
+            
+            equationinput.addEventListener("change",function(){try{if(equationinput.value == "") {submit.innerHTML = "Remove";}}catch(a){}},false);
+            equationinput.addEventListener("keypress",function(e){try{if(e.keyCode == 13){domainButton.click();}}catch(a){}},false);
+        }
+        
+        if(!isParam) {
+            equationinput.addEventListener("change",function(){try{eqStructs.update();eqStructs.evaluate();setUp(surfaceplot, global_valuess);}catch(a){}},false);
+            // equationinput.addEventListener("keypress",function(e){try{if(e.keyCode == 13)eqStructs.update();}catch(a){}},false);
+        } 
+        alpha.addEventListener("change",function(){try{eqStructs.update();setUp(surfaceplot, global_valuess);}catch(a){alert(a)}},false);
+        color1.addEventListener("change",function(){try{eqStructs.update();setUp(surfaceplot, global_valuess);}catch(a){alert(a)}},false);
+        show.addEventListener("change",function(){try{eqStructs.update();setUp(surfaceplot, global_valuess);}catch(a){alert(a)}},false);
+        close.addEventListener("click", function() {
+            let input = isParam ? $(this).closest('div.param_input').first()[0] : $(this).closest('div.input').first()[0];
+            input.parentNode.removeChild(input);
+            eqStructs.update();
+            setUp(surfaceplot, global_valuess);
+        });
+    }
+}
+
 function init_settings(rotationMatrix, dimensions) {
-    console.log(dimensions);
+    
     var background = '#f8f8f8';
     var axisForeColour = '#444444';
     var hideFloorPolygons = false;
@@ -142,167 +331,9 @@ function shareURL(surfaceplot, path) {
     $('.embed').val("<iframe style=\"width:100%;height:700px\" frameBorder=\"0\" src=\"" + url + "&dimensions=[600,600]\"></iframe><br><center><a href=\""+ url + "\" target=\"_blank\">WebGL Surface Grapher</a></center>");
 }
 
-var nullDatas = [{nRows: numSamples, nCols: numSamples, formattedValues: null, scaleFactor: 1, colourGradient: [{rgb:{red:0, green:0, blue:0}, alpha:0}]}];
-
-
 function add_equation(surfaceplot, eqInfo, isParam) {
-    var num_equations = document.getElementById("equations").childElementCount;
-    if(document.getElementById("param_equations")!= null)
-	var num_params = document.getElementById("param_equations").childElementCount;
-    else
-	var num_params = 0;
-
-    if(!isParam)
-	container = document.getElementById("equations");
-    else
-	container = document.getElementById("param_equations");
-
-    var input = document.createElement("div");
-    
-    if(!isParam)
-	input.className = "input"; // set the CSS class
-    else
-	input.className = "param_input";
-
-    input.id = "input" + num_equations;
-
-    container.appendChild(input); 
-
-    var eqdiv = document.createElement("div");
-    eqdiv.className = "eqdiv";
-
-    var show = document.createElement("input");
-    show.type = "checkbox";
-    show.value = "1";
-    show.checked = "true";
-    show.style.cssFloat = "left";
-    show.style.width = "20px";
- 
-    var equationinput = document.createElement("input");
-    if(!isParam) {
-	equationinput.className = "equationinput"; // set the CSS class
-	equationinput.id = "equationinput" + num_equations;
-    } else {
-	equationinput.className = "equationinput"; // set the CSS class
-	equationinput.id = "equationinput" + num_params;
-    }
-   
-    equationinput.type = "text";
-
-    equationinput.value = eqInfo == null ? "" : eqInfo.str;
-    
-    var color1 = document.createElement("input");
-    
-    var k = num_equations + num_params;
-
-    color1.type = "color";
-    color1.className = "color1";
-    color1.style.cssFloat = "right";
-    color1.style.height = "1.75em";
-    color1.style.width = "2em";
-
-    if(eqInfo.color == "") {
-	var hue = (0.55 + k*0.37)%1;
-	var saturation = (hue > 0.45) && (hue < 0.6) ? 0.5 : 0.3;
-	var color = HSVtoRGB(hue, saturation, 0.85);
-	color1.value = "#" + rgbToHex(color);
-    } else {
-	color1.value = "#" + eqInfo.color;
-    }
-    
-    var alpha = document.createElement("input");
-    alpha.type = "number";
-    alpha.min = "0.5";
-    alpha.max = "1";
-    alpha.step = "0.2";
-    alpha.style.width = "2.5em";
-    alpha.style.color = "#888";
-    alpha.style.cssFloat = "right";
-
-    alpha.value = eqInfo.alpha == null ? "0.9":parseFloat(eqInfo.alpha);
-
-    input.appendChild(show);        
-    input.appendChild(eqdiv);
-    input.appendChild(color1);
-    input.appendChild(alpha);
-    
-    eqdiv.appendChild(equationinput);
-    
-    if(isParam) {
-	color1.style.display="none";
-	alpha.style.display="none";
-    }
-
-    if(isParam) {
-	var properties = document.createElement("div");
-	properties.className = "properties";
-
-	var domainButton = document.createElement("button");
-	domainButton.type="button";
-	domainButton.className ="btn btn-outline-info btn-sm";
-	domainButton.style.cssFloat = "right";
-	domainButton.style.display = "inline-block";
-	domainButton.style.marginRight = "0px";
-	domainButton.style.marginLeft = "0px";
-
-	domainButton.innerHTML = "More";
-	domainButton.onclick = function() {eqdiv.style.paddingBottom = "4px";properties.style.display = "block";this.style.display = "none";color1.style.display="inline";alpha.style.display="inline";};
-	input.appendChild(domainButton);
-
-
-	var sdomain = document.createElement("div");
-	var tdomain = document.createElement("div");
-	sdomain.className = "domain";
-	sdomain.style.clear="left";
-	sdomain.style.cssFloat="left";
-	sdomain.style.marginLeft="20px";
-	tdomain.className = "domain"
-	tdomain.style.cssFloat="left"
-	tdomain.style.marginLeft="4px";
-	sdomain.innerHTML = "<span>$s \\in$</span>";
-	tdomain.innerHTML="<span>$t \\in$</span>";
-
-	var sdomaininput = document.createElement("input");
-	sdomaininput.type = "text";
-	sdomaininput.value = eqInfo.domain.s;
-	sdomaininput.style.width="3em";
-	var tdomaininput = document.createElement("input");
-	tdomaininput.type = "text";
-	tdomaininput.value = eqInfo.domain.t;
-	tdomaininput.style.width="3em";
-
-	sdomain.appendChild(sdomaininput);
-	tdomain.appendChild(tdomaininput);	
-
-	var submit = document.createElement("button");
-	submit.type = "button";
-	submit.className ="btn btn-outline-info btn-sm";
-	submit.style.cssFloat = "right";
-	submit.innerHTML="Graph";
-	submit.onclick = function(){try{color1.style.display="inline-block";alpha.style.display="inline-block";eqStructs.update();eqStructs.evaluate();setUp(surfaceplot, global_valuess);properties.style.display = "none";}catch(a){}};
-
-
-	properties.appendChild(sdomain);
-	properties.appendChild(tdomain);
-	properties.appendChild(submit);
-
-	input.appendChild(properties);
-
-	MathJax.Hub.Queue(["Typeset", MathJax.Hub, sdomain]);
-	MathJax.Hub.Queue(["Typeset", MathJax.Hub, tdomain]);
-
-	equationinput.addEventListener("change",function(){try{if(equationinput.value == "") {submit.innerHTML = "Remove";}}catch(a){}},false);
-	equationinput.addEventListener("keypress",function(e){try{if(e.keyCode == 13){domainButton.click();}}catch(a){}},false);
-    }
-
-    if(!isParam) {
-	equationinput.addEventListener("change",function(){try{eqStructs.update();eqStructs.evaluate();setUp(surfaceplot, global_valuess);}catch(a){}},false);
-   	equationinput.addEventListener("keypress",function(e){try{if(e.keyCode == 13)eqStructs.update();}catch(a){}},false);
-    } 
-     alpha.addEventListener("change",function(){try{eqStructs.update();setUp(surfaceplot, global_valuess);}catch(a){alert(a)}},false);
-       color1.addEventListener("change",function(){try{eqStructs.update();setUp(surfaceplot, global_valuess);}catch(a){alert(a)}},false);
-    show.addEventListener("change",function(){try{eqStructs.update();setUp(surfaceplot, global_valuess);}catch(a){alert(a)}},false);
-        
+    let eqstruct = new eqStruct(surfaceplot, eqInfo, isParam); // testing
+    console.log(eqstruct);        
 }
 
 function latexfy (parent, str) { /* parent should be of eqdiv class */
@@ -419,45 +450,55 @@ eqStructs = function() {
     }
 
     this.update = function() {
-	this.cleanup();
-	this.eqStructArray = new Array();
+        this.cleanup();
+        this.eqStructArray = new Array();
 	
-	this.inputList = document.getElementsByClassName("input");
-	for(var k = 0; k < this.inputList.length; k++) {
-	    var color = hexToRgb(this.inputList.item(k).childNodes[2].value);
-	    var alpha = this.inputList.item(k).childNodes[3].value;
-	    var colourGradient = [{rgb:color, alpha:alpha}];
+        this.inputList = document.getElementsByClassName("input");
+        for(var k = 0; k < this.inputList.length; k++) {
+            var color = hexToRgb($(this.inputList.item(k)).find('.color').first().val());
+            var alpha = $(this.inputList.item(k)).find('.alpha').first().val();
+            var colourGradient = [{rgb:color, alpha:alpha}];
+            
+            // this.constructArray({str:this.inputList.item(k).childNodes[1].childNodes[0].value, colourGradient:colourGradient, show:this.inputList.item(k).childNodes[0].checked, isParam:false, colourGradient:colourGradient});
+            
+            this.constructArray({
+                str : $(this.inputList.item(k)).find('.equationinput').first().val(),
+                colourGradient : colourGradient,
+                show : $(this.inputList.item(k)).find('.show').first()[0].checked,
+                isParam : false, 
+                colourGradient : colourGradient
+            });
 
-	    this.constructArray({str:this.inputList.item(k).childNodes[1].childNodes[0].value, colourGradient:colourGradient, show:this.inputList.item(k).childNodes[0].checked, isParam:false, colourGradient:colourGradient});
-
-	    latexfy(this.inputList.item(k).childNodes[1], this.inputList.item(k).childNodes[1].childNodes[0].value);
-	}
+            latexfy($(this.inputList.item(k)).find('.eqdiv').first()[0], $(this.inputList.item(k)).find('.equationinput').first().val());
+        }
 	
-	this.inputList = document.getElementsByClassName("param_input");
-
-	for(var k = 0; k < this.inputList.length; k++) {
-	    var sdomain = this.inputList.item(k).childNodes[5].childNodes[0].childNodes[1].value.split(",");
-	    var tdomain = this.inputList.item(k).childNodes[5].childNodes[1].childNodes[1].value.split(",");
-	    var color = hexToRgb(this.inputList.item(k).childNodes[2].value);
-	    var alpha = this.inputList.item(k).childNodes[3].value;	  
-	    var colourGradient = [{rgb:color, alpha:alpha}];
-	    this.constructArray({str:this.inputList.item(k).childNodes[1].childNodes[0].value, colourGradient:colourGradient, show:this.inputList.item(k).childNodes[0].checked, domain:{sMin:parseFloat(sdomain[0]), sMax:parseFloat(sdomain[1]), tMin:parseFloat(tdomain[0]), tMax:parseFloat(tdomain[1])}, isParam:true, colourGradient:colourGradient});
-
-	    latexfy(this.inputList.item(k).childNodes[1], this.inputList.item(k).childNodes[1].childNodes[0].value);
-	}
-	//document.getElementById("share-div").style.display="none";
-
+        this.inputList = document.getElementsByClassName("param_input");
+        
+        for(var k = 0; k < this.inputList.length; k++) {
+            var sdomain = $(this.inputList.item(k)).find('input.sdomain').first().val().split(",");
+            var tdomain = $(this.inputList.item(k)).find('input.tdomain').first().val().split(",");
+            var color = hexToRgb($(this.inputList.item(k)).find('.color').first().val());
+            var alpha = $(this.inputList.item(k)).find('.alpha').first().val();	  
+            var colourGradient = [{rgb:color, alpha:alpha}];
+            
+            this.constructArray({
+                str:$(this.inputList.item(k)).find('.equationinput').first().val(),
+                colourGradient:colourGradient, show:this.inputList.item(k).childNodes[0].checked, domain:{sMin:parseFloat(sdomain[0]), sMax:parseFloat(sdomain[1]), tMin:parseFloat(tdomain[0]), tMax:parseFloat(tdomain[1])}, isParam:true, colourGradient:colourGradient});
+            
+            latexfy($(this.inputList.item(k)).find('.eqdiv').first()[0], $(this.inputList.item(k)).find('.equationinput').first().val());
+        }
+        //document.getElementById("share-div").style.display="none";
+    
     }
 
     this.constructArray = function(eqStruct) {
-	this.eqStructArray.push(eqStruct);
+        this.eqStructArray.push(eqStruct);
     }
 
     this.evaluate = function() {	
-	global_valuess = values_gen(this.eqStructArray);
+        global_valuess = values_gen(this.eqStructArray);
     } 
-
- 
+        
 }
 
 
