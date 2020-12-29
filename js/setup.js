@@ -259,6 +259,7 @@ class eqStruct {
         },false);
         close.addEventListener("click", function() {
             let input = isParam ? $(this).closest('div.param_input').first()[0] : $(this).closest('div.input').first()[0];
+            console.log('DELETE ' + input.id);
             delete eqStructs.eqStructArray[input.id];
             input.parentNode.removeChild(input);
             eqStructs.update();
@@ -404,7 +405,7 @@ function shareURL(surfaceplot, path) {
     url = getJSON(surfaceplot, path);
 
     $('.share').val(url);
-    $('.embed').val("<iframe style=\"width:100%;height:700px\" frameBorder=\"0\" src=\"" + url + "&dimensions=[600,600]\"></iframe><br><center><a href=\""+ url + "\" target=\"_blank\">WebGL Surface Grapher</a></center>");
+    $('.embed').val("<iframe style=\"width:100%;height:500px\" frameBorder=\"0\" src=\"" + url + "&dimensions=[480,480]\"></iframe>");
 }
 
 function add_equation(surfaceplot, eqInfo, isParam) {
@@ -526,9 +527,6 @@ eqStructs = function() {
 	    this.eqList.item(k).id = "equationinput" + k;
 	}
 
-	document.getElementById("new_equation").style.display="block";
-	document.getElementById("new_param").style.display="block";
-
 	var mathDivs = document.getElementsByClassName("mathdiv");
 	while(mathDivs.length > 0) {
 	    mathDivs[0].parentNode.removeChild(mathDivs[0]);
@@ -571,6 +569,8 @@ eqStructs = function() {
         }
 
         latexfy($(inputDiv).find('.eqdiv').first()[0], $(inputDiv).find('.equationinput').first().val());
+        document.getElementById("new_equation").style.display="block";
+    	document.getElementById("new_param").style.display="block";
     }
 
     this.update = function() {
@@ -588,7 +588,7 @@ eqStructs = function() {
             this.singleUpdate(this.inputList.item(k));
         }
         //document.getElementById("share-div").style.display="none";
-
+        this.evaluate();
     }
 
     this.constructArray = function(eqStruct) {
