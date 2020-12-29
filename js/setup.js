@@ -182,17 +182,15 @@ class eqStruct {
             submit.className ="btn btn-outline-info btn-sm";
             submit.style.cssFloat = "right";
             submit.innerHTML="Graph";
-            submit.onclick = function() {
-                try {
-                    color1.style.display="inline-block";
-                    alpha.style.display = "inline-block";
-                    eqStructs.singuleUpdate(input);
-                    eqStructs.evaluate();
-                    setUp(surfaceplot, global_valuess);
-                    properties.style.display = "none";
-                } catch(a)
-                {}
-            };
+            submit.addEventListener("click", function() {
+                console.log('graphing');
+                color1.style.display="inline-block";
+                alpha.style.display = "inline-block";
+                eqStructs.singleUpdate(input);
+                eqStructs.evaluate();
+                setUp(surfaceplot, global_valuess);
+                properties.style.display = "none";
+            });
 
             properties.appendChild(sdomain);
             properties.appendChild(tdomain);

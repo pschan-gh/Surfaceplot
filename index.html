@@ -297,8 +297,9 @@ if (urlParams.has('data')) {
     data = JSON.parse(urlParams.get('data'));
     console.log(data);
     params.forEach(function(param) {
-        if (data['param']) {
-            $('#' + param).val(data['param']);
+        if (data[param]) {
+            $('#' + param).val(data[param]);
+            console.log($('#' + param)[0]);
         }
     });
     rotationMatrix = data['rotationMatrix'];
