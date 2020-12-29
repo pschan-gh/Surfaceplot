@@ -50,9 +50,15 @@ class eqStruct {
         show.style.cssFloat = "left";
         show.style.width = "20px";
         
-        let close = document.createElement("div");
+        let close = document.createElement("button");
+        close.className = 'btn btn-outline-info btn-sm';
         close.style.cssFloat = "left";
-        // close.style.width = "20px";
+        // close.style.width = "2em";
+        // close.style.height = "1em";
+        // close.style.border = 'solid 2px';
+        // close.style.borderRadius = '5px';
+        // close.style.fontSize = '0.75em';
+        // close.style.textAlign = 'center';
         close.innerHTML = "&times;";
      
         
@@ -99,8 +105,8 @@ class eqStruct {
 
         alpha.value = eqInfo.alpha == null ? "0.9":parseFloat(eqInfo.alpha);
 
-        input.appendChild(show);
         input.appendChild(close);
+        input.appendChild(show);        
         input.appendChild(eqdiv);
         input.appendChild(color1);
         input.appendChild(alpha);
@@ -360,10 +366,20 @@ function latexfy (parent, str) { /* parent should be of eqdiv class */
 
     MathJax.Hub.Queue(["Typeset", MathJax.Hub, mathDiv]);
     
-    if(eqs.length > 1){parent.parentNode.childNodes[4].style.display = "none";parent.parentNode.childNodes[2].style.display = "block";parent.parentNode.childNodes[3].style.display = "block";}
-
-    mathDiv.onclick = function(){parent.removeChild(mathDiv);parent.childNodes[0].style.display = "block";if(eqs.length > 1){parent.parentNode.childNodes[4].style.display = "block";parent.parentNode.childNodes[2].style.display = "none"; parent.parentNode.childNodes[3].style.display = "none";}};
+    if ( eqs.length > 1 ){
+        parent.parentNode.childNodes[5].style.display = "none";
+        parent.parentNode.childNodes[3].style.display = "block";
+        parent.parentNode.childNodes[4].style.display = "block";
+    }
     
+    mathDiv.onclick = function() {
+        parent.removeChild(mathDiv);
+        parent.childNodes[0].style.display = "block";
+        if (eqs.length > 1) {
+            parent.parentNode.childNodes[5].style.display = "block";
+            parent.parentNode.childNodes[3].style.display = "none"; parent.parentNode.childNodes[4].style.display = "none";
+        }
+    };    
 }
 
 function componentToHex(c) {
@@ -482,8 +498,18 @@ eqStructs = function() {
             var colourGradient = [{rgb:color, alpha:alpha}];
             
             this.constructArray({
-                str:$(this.inputList.item(k)).find('.equationinput').first().val(),
-                colourGradient:colourGradient, show:this.inputList.item(k).childNodes[0].checked, domain:{sMin:parseFloat(sdomain[0]), sMax:parseFloat(sdomain[1]), tMin:parseFloat(tdomain[0]), tMax:parseFloat(tdomain[1])}, isParam:true, colourGradient:colourGradient});
+                str : $(this.inputList.item(k)).find('.equationinput').first().val(),
+                colourGradient : colourGradient, 
+                show : $(this.inputList.item(k)).find('.show').first()[0].checked, 
+                domain : { 
+                    sMin:parseFloat(sdomain[0]), 
+                    sMax:parseFloat(sdomain[1]), 
+                    tMin : parseFloat(tdomain[0]), 
+                    tMax:parseFloat(tdomain[1])
+                }, 
+                isParam:true,
+                colourGradient : colourGradient
+            });
             
             latexfy($(this.inputList.item(k)).find('.eqdiv').first()[0], $(this.inputList.item(k)).find('.equationinput').first().val());
         }
