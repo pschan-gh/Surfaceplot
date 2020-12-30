@@ -6,10 +6,15 @@ body {
     color: #888;  /* Soften the text a bit. */
 }
 
+input[type='checkbox'].large {
+    width:25px;
+    height:25px;
+}
+
 #menu_button {
     position:absolute;
     /* top:0.25em; */
-    left:25px;
+    left:1.5%;
     font-size:1.5em;
     float:left;
     z-index:200;
@@ -195,9 +200,9 @@ and (max-device-width : 600px) {
 
     #menu_button {
     position:absolute;
-    top:1em;
-    left:1em;
-    font-size:1.5em;
+    /* top:1em;
+    left:1em; */
+    /* font-size:1.5em; */
     z-index:200;
     }
 
@@ -277,9 +282,9 @@ and (max-width : 1600px) {
 
     #menu_button {
     position:absolute;
-    top:1em;
+    /* top:1em;
     left:1em;
-    font-size:1.5em;
+    font-size:1.5em; */
     z-index:200;
     }
 

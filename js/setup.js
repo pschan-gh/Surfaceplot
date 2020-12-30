@@ -51,11 +51,12 @@ class eqStruct {
 
         let show = document.createElement("input");
         show.type = "checkbox";
-        show.className = 'show';
+        show.className = 'show large';
         show.value = "1";
         show.checked = "true";
         show.style.cssFloat = "left";
-        show.style.width = "20px";
+        show.style.marginLeft = '5px';
+        show.style.marginTop = '2px';
 
         // let close = document.createElement("button");
         let close = document.createElement("span");
