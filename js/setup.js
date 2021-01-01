@@ -263,6 +263,7 @@ class eqStruct {
             console.log('DELETE ' + input.id);
             delete eqStructs.eqStructArray[input.id];
             input.parentNode.removeChild(input);
+            // eqStructs.cleanup();
             eqStructs.update();
             setUp(surfaceplot, global_valuess);
         });
@@ -416,27 +417,43 @@ function add_equation(surfaceplot, eqInfo, isParam) {
 
 function latexfy (parent, str) { /* parent should be of eqdiv class */
     var eqs = str.split(",");
-    var mathDiv = document.createElement("div");
-    mathDiv.className = "mathdiv";
-    mathDiv.id = String.fromCharCode(65 + Math.floor(Math.random() * 26)) + Date.now();
+    
+    console.log(parent);
+    if ($(parent).find('.mathdiv').length == 0) {
 
-    mathDiv.style.textAlign = eqs.length == 1?"center":"left";
+        var mathDiv = document.createElement("div");
+        mathDiv.className = "mathdiv";
+        // mathDiv.id = String.fromCharCode(65 + Math.floor(Math.random() * 26)) + Date.now();
+        
+        mathDiv.style.textAlign = eqs.length == 1 ? "center":"left";
+    
+        mathDiv.style.overflow = "hidden";
+        mathDiv.style.width = "100%";
 
-    mathDiv.style.overflow = "hidden";
-    mathDiv.style.width = "100%";
+        //    alert(parent.id);
+        parent.childNodes[0].style.display = "none";
+        parent.appendChild(mathDiv);
 
-//    alert(parent.id);
-    parent.childNodes[0].style.display = "none";
-    parent.appendChild(mathDiv);
-
-    if(eqs.length == 1) {
-	mathDiv.innerHTML = "$\\displaystyle z = " + math.parse(eqs[0]).toTex() + "$";
+        if(eqs.length == 1) {
+            mathDiv.innerHTML = "$\\displaystyle z = " + math.parse(eqs[0]).toTex() + "$";
+        } else {
+            mathDiv.innerHTML = "<ul><li>$x = " + math.parse(eqs[0]).toTex() + "$<li> $y = "+ math.parse(eqs[1]).toTex() + "$<li>$z = " + math.parse(eqs[2]).toTex() + "$</ul>";
+        }
+    
+        MathJax.Hub.Queue(["Typeset", MathJax.Hub, mathDiv]);
+        
+        
+        $(mathDiv).off();
+        mathDiv.onclick = function() {
+            parent.removeChild(mathDiv);
+            parent.childNodes[0].style.display = "block";
+            if (eqs.length > 1) {
+                parent.parentNode.childNodes[5].style.display = "block";
+                parent.parentNode.childNodes[3].style.display = "none"; parent.parentNode.childNodes[4].style.display = "none";
+            }
+        };
     }
-    else {
-	mathDiv.innerHTML = "<ul><li>$x = " + math.parse(eqs[0]).toTex() + "$<li> $y = "+ math.parse(eqs[1]).toTex() + "$<li>$z = " + math.parse(eqs[2]).toTex() + "$</ul>";
-    }
-
-    MathJax.Hub.Queue(["Typeset", MathJax.Hub, mathDiv]);
+    $(parent).addClass('rendered');
 
     if ( eqs.length > 1 ){
         parent.parentNode.childNodes[5].style.display = "none";
@@ -444,14 +461,7 @@ function latexfy (parent, str) { /* parent should be of eqdiv class */
         parent.parentNode.childNodes[4].style.display = "block";
     }
 
-    mathDiv.onclick = function() {
-        parent.removeChild(mathDiv);
-        parent.childNodes[0].style.display = "block";
-        if (eqs.length > 1) {
-            parent.parentNode.childNodes[5].style.display = "block";
-            parent.parentNode.childNodes[3].style.display = "none"; parent.parentNode.childNodes[4].style.display = "none";
-        }
-    };
+    
 }
 
 function componentToHex(c) {
@@ -506,32 +516,32 @@ eqStructs = function() {
     this.eqStructArray = new Object();
 
     this.cleanup = function() {
-	var show_new_equation = 1;
+        var show_new_equation = 1;
 
-	for (var k = this.eqList.length - 1; k >= 0 ; k--) {
-	    var element = this.eqList.item(k);
-	    if(element.value == "") {
-		show_new_equation = 0;
-		element.parentNode.parentNode.parentNode.removeChild(element.parentNode.parentNode);
-	    }
-	}
-
-	this.inputList = document.getElementsByClassName("input");
-
-	for(var k = 0; k < this.inputList.length; k++) {
-	    this.inputList.item(k).id = "input" + k;
-	}
-
-	this.eqList = document.getElementsByClassName("equationinput");
-
-	for( k = 0; k < this.eqList.length; k++) {
-	    this.eqList.item(k).id = "equationinput" + k;
-	}
-
-	var mathDivs = document.getElementsByClassName("mathdiv");
-	while(mathDivs.length > 0) {
-	    mathDivs[0].parentNode.removeChild(mathDivs[0]);
-	}
+        for (var k = this.eqList.length - 1; k >= 0 ; k--) {
+            var element = this.eqList.item(k);
+            if(element.value == "") {
+                show_new_equation = 0;
+                element.parentNode.parentNode.parentNode.removeChild(element.parentNode.parentNode);
+            }
+        }
+        
+        this.inputList = document.getElementsByClassName("input");
+        
+        for(var k = 0; k < this.inputList.length; k++) {
+            this.inputList.item(k).id = "input" + k;
+        }
+        
+        this.eqList = document.getElementsByClassName("equationinput");
+        
+        for( k = 0; k < this.eqList.length; k++) {
+            this.eqList.item(k).id = "equationinput" + k;
+        }
+        
+        var mathDivs = document.getElementsByClassName("mathdiv");
+        while(mathDivs.length > 0) {
+            mathDivs[0].parentNode.removeChild(mathDivs[0]);
+        }
     }
 
     this.singleUpdate = function(inputDiv) {
@@ -575,7 +585,7 @@ eqStructs = function() {
     }
 
     this.update = function() {
-        this.cleanup();
+        // this.cleanup();
         this.eqStructArray = new Object();
 
         this.inputList = document.getElementsByClassName("input");
